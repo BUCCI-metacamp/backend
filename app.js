@@ -29,6 +29,12 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
+// Supabase 클라이언트 생성
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
+
+// supabase 클라이언트를 app.locals에 저장
+app.locals.supabase = supabase;
+
 app.use('/', indexRouter);
 
 app.use(errorHandler);
