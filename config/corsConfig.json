@@ -1,0 +1,5 @@
+{
+  "origin": ["http://localhost"],
+  "methods": ["OPTIONS", "GET", "POST", "HEAD", "PUT", "PATCH", "DELETE"],
+  "credentials": true
+}
