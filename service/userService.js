@@ -159,7 +159,7 @@ const service = {
     try {
       hashPassword = await hashUtil.makePasswordHash(params.password);
       logger.debug(`userService.updatePassword - hashPassword: ${JSON.stringify(hashPassword)}`);
-      updated = await userDao.updatePassword({
+      updated = await userDao.update({
         id: params.id,
         password: hashPassword,
       });
@@ -172,6 +172,47 @@ const service = {
 
     return new Promise((resolve) => {
       resolve(updated);
+    });
+  },
+
+  // 권한 수정
+  async updateRole(params) {
+    let updated = null;
+
+    try {
+      updated = await userDao.update({
+        id: params.id,
+        role: params.role,
+      });
+    } catch (error) {
+      logger.error(`(userService.updateRole) ${error.toString()}`);
+      return new Promise((resolve, reject) => {
+        reject(error);
+      });
+    }
+
+    return new Promise((resolve) => {
+      resolve(updated);
+    });
+  },
+
+  // 회원 탈퇴
+  async delete(params) {
+    let deleted = null;
+
+    try {
+      deleted = await userDao.delete({
+        id: params.id,
+      });
+    } catch (error) {
+      logger.error(`(userService.delete) ${error.toString()}`);
+      return new Promise((resolve, reject) => {
+        reject(error);
+      });
+    }
+
+    return new Promise((resolve) => {
+      resolve(deleted);
     });
   }
 }

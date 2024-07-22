@@ -45,13 +45,29 @@ const dao = {
     });
   },
 
-  updatePassword(params) {
+  // 유저 정보 갱신
+  update(params) {
     return new Promise((resolve, reject) => {
       User.update(params, {
         where: { id: params.id },
       })
         .then(([updated]) => {
           resolve({ updatedCount: updated });
+        })
+        .catch((err) => {
+          reject(err);
+        });
+    });
+  }, 
+
+  // 유저 삭제
+  delete(params) {
+    return new Promise((resolve, reject) => {
+      User.destroy({
+        where: { id: params.id },
+      })
+        .then((deleted) => {
+          resolve({ deletedCount: deleted });
         })
         .catch((err) => {
           reject(err);
