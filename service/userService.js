@@ -129,6 +129,50 @@ const service = {
         refreshToken: refreshToken,
       });
     });
+  },
+
+  // 정보 조회
+  async info(params) {
+    let result = null;
+
+    try {
+      user = await userDao.findByPk(params);
+      const {password, ...info} = user;
+      result = info;
+      logger.debug(`(userService.info) ${JSON.stringify(result)}`);
+    } catch (error) {
+      logger.error(`(userService.info) ${error.toString()}`);
+      return new Promise((resolve, reject) => {
+        reject(error);
+      });
+    }
+
+    return new Promise((resolve) => {
+      resolve(result);
+    });
+  },
+
+  // 비밀번호 수정
+  async updatePassword(params) {
+    let updated = null;
+
+    try {
+      hashPassword = await hashUtil.makePasswordHash(params.password);
+      logger.debug(`userService.updatePassword - hashPassword: ${JSON.stringify(hashPassword)}`);
+      updated = await userDao.updatePassword({
+        id: params.id,
+        password: hashPassword,
+      });
+    } catch (error) {
+      logger.error(`(userService.updatePassword) ${error.toString()}`);
+      return new Promise((resolve, reject) => {
+        reject(error);
+      });
+    }
+
+    return new Promise((resolve) => {
+      resolve(updated);
+    });
   }
 }
 

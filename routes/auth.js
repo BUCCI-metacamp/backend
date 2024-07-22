@@ -30,7 +30,6 @@ router.post("/signup", async (req, res, next) => {
       res.sendStatus(201);
     }
   } catch (error) {
-    logger.error(error);
     next(error);
   }
 })
@@ -52,7 +51,6 @@ router.get("/duplicate-check", async (req, res, next) => {
       res.status(200).json({"available": true});
     }
   } catch (error) {
-    logger.error(error);
     next(error);
   }
 })
@@ -71,7 +69,6 @@ router.post("/login", async (req, res, next) => {
     res.cookie('refreshToken', refreshToken, { httpOnly: true })
     res.status(200).json(result);
   } catch (err) {
-    logger.error(err);
     next(err);
   }
 })
