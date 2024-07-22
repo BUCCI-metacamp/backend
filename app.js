@@ -4,11 +4,14 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
+const swaggerJsdoc = require("swagger-jsdoc");
+const swaggerUi = require("swagger-ui-express");
 const logger = require('./lib/logger');
 const models = require('./models/index');
 const corsConfig = require('./config/corsConfig.json');
 const errorHandler = require('./error/ErrorHandler')
 const indexRouter = require('./routes/index');
+const options = require('./swagger/config')
 
 dotenv.config();
 
@@ -35,6 +38,8 @@ models.sequelize.authenticate().then(() => {
   logger.error('DB Connection fail', error);
 });
 
+const specs = swaggerJsdoc(options);
+
 app.use(cors(corsConfig));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -44,6 +49,11 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 app.use('/', indexRouter);
+
+app.use("/swagger-ui",
+  swaggerUi.serve,
+  swaggerUi.setup(specs)
+);
 
 app.use(errorHandler);
 
