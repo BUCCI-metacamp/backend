@@ -1,24 +1,16 @@
 const Sequelize = require("sequelize");
 
-module.exports = class User extends Sequelize.Model {
+module.exports = class Report extends Sequelize.Model {
   static init(sequelize) {
     return super.init(
       {
-        userId: {
-          type: Sequelize.STRING(100),
-          unique: true,
-          allowNull: false,
-        },
-        password: {
+        title: {
           type: Sequelize.STRING(500),
           allowNull: false,
         },
-        name: {
-          type: Sequelize.STRING(50),
+        content: {
+          type: Sequelize.TEXT,
           allowNull: false,
-        },
-        role: {
-          type: Sequelize.STRING(50),
         },
       },
       {
@@ -31,6 +23,6 @@ module.exports = class User extends Sequelize.Model {
   }
 
   static associate(db) {
-    db.User.hasMany(db.Report, { foreignKey: { name: 'userId' }, onDelete: 'SET NULL', as: 'Report' });
+    db.Report.belongsTo(db.User, { foreignKey: { name: "userId" }, onDelete: "SET NULL", as: "author", });
   }
 };

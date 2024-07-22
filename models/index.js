@@ -1,5 +1,6 @@
 const { sequelize } = require('./connection');
 const User = require('./user');
+const Report = require('./report');
 
 const db = {};
 
@@ -7,6 +8,7 @@ db.sequelize = sequelize;
 
 // model 생성
 db.User = User;
+db.Report = Report;
 
 console.log(Object.keys(db));
 // model init

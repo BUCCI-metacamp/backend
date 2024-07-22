@@ -1,5 +1,4 @@
 const { User } = require("../models/index");
-const { findByPk } = require("../models/user");
 
 const dao = {
   // 등록
