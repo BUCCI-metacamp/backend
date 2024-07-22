@@ -4,6 +4,7 @@ const router = express.Router();
 const logger = require('../lib/logger');
 const CustomError = require('../error/CustomError');
 const userService = require('../service/userService');
+const tokenUtil = require('../lib/tokenUtil');
 
 // 회원 생성
 router.post("/signup", async (req, res, next) => {
@@ -27,7 +28,7 @@ router.post("/signup", async (req, res, next) => {
       const result = await userService.reg(params);
       logger.info(`(user.reg.result) ${JSON.stringify(result)}`);
 
-      res.sendStatus(201);
+      res.status(201).json({"result": "success"});
     }
   } catch (error) {
     next(error);
