@@ -7,7 +7,7 @@ const { isLoggedIn, checkRole } = require('../lib/middleware');
 const userService = require('../service/userService');
 
 router.use(isLoggedIn);
-router.use(checkRole(['admin', 'user']));
+router.use(checkRole(['admin']));
 
 router.put('/users/:id/role', async (req, res, next) => {
   try {

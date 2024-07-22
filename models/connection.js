@@ -30,4 +30,16 @@ const sequelize = new Sequelize(
   },
 );
 
+
+// TimescaleDB 확장 생성을 위한 함수
+async function createTimescaleExtension() {
+  try {
+    await sequelize.query('CREATE EXTENSION IF NOT EXISTS timescaledb;');
+    console.log('TimescaleDB extension created successfully');
+  } catch (error) {
+    console.error('Error creating TimescaleDB extension:', error);
+  }
+}
+
 exports.sequelize = sequelize;
+exports.createTimescaleExtension = createTimescaleExtension;
