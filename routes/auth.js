@@ -5,9 +5,10 @@ const logger = require('../lib/logger');
 const CustomError = require('../error/CustomError');
 const userService = require('../service/userService');
 const tokenUtil = require('../lib/tokenUtil');
+const { isLoggedIn, checkRole } = require('../lib/middleware');
 
 // 회원 생성
-router.post("/signup", async (req, res, next) => {
+router.post("/signup", isLoggedIn, checkRole(['admin']), async (req, res, next) => {
   try {
     const params = {
       userId: req.body.userId,

@@ -11,7 +11,9 @@ const models = require('./models/index');
 const corsConfig = require('./config/corsConfig.json');
 const errorHandler = require('./error/ErrorHandler')
 const indexRouter = require('./routes/index');
-const options = require('./swagger/config')
+const options = require('./swagger/config');
+const { createTimescaleExtension } = require('./models/connection');
+const mqttClient = require('./mqtt/mqttClient');
 
 dotenv.config();
 
@@ -27,6 +29,8 @@ app.set('view engine', 'ejs');
 // DB 연결 확인 및 table 생성
 models.sequelize.authenticate().then(() => {
   logger.info('DB connection success');
+
+  createTimescaleExtension();
 
   // sequelize sync (table 생성)
   models.sequelize.sync().then(() => {
