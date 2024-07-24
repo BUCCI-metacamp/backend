@@ -1,4 +1,4 @@
-const { Report, User } = require("../models");
+const { Report, User } = require("../../shared/models/index");
 
 const dao = {
   // 등록

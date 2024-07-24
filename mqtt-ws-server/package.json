@@ -1,0 +1,14 @@
+{
+  "name": "mqtt-ws-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "start": "node ./bin/www",
+    "dev": "nodemon ./bin/www"
+  },
+  "dependencies": {
+    "mqtt": "^5.8.1",
+    "socket.io": "^4.7.5"
+  }
+}
