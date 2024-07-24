@@ -23,7 +23,13 @@ app.set('port', port);
  */
 
 const server = http.createServer(app);
-const io = socketIo(server);
+const io = socketIo(server, {
+  cors: {
+    origin: ["http://localhost:4000"],
+    methods: ["GET", "POST"],
+    credentials: true
+  }
+});
 
 socketHandler(io);
 
