@@ -3,6 +3,7 @@ const User = require('./user');
 const Report = require('./report');
 const Edukit = require('./edukit');
 const PowerState = require('./powerState');
+const Production = require('./production');
 
 const db = {};
 
@@ -13,6 +14,7 @@ db.User = User;
 db.Report = Report;
 db.Edukit = Edukit;
 db.PowerState = PowerState;
+db.Production = Production;
 
 console.log(Object.keys(db));
 // model init

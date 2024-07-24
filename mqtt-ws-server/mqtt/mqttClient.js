@@ -12,7 +12,7 @@ client.on('connect', () => {
 
 client.on('message', async (topic, message) => {
   const messageString = message.toString();
-  logger.info(`토픽 ${topic}에서 메시지 수신: ${messageString}`);
+  // logger.info(`토픽 ${topic}에서 메시지 수신: ${messageString}`);
   switch (topic) {
     case 'edge/edukit/status':
       statusDataReceivedHandler(JSON.parse(messageString));
