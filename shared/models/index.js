@@ -1,4 +1,4 @@
-const { sequelize } = require('./connection');
+const { sequelize } = require('../../shared/config/connection');
 const User = require('./user');
 const Report = require('./report');
 const Edukit = require('./edukit');

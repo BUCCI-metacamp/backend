@@ -13,18 +13,35 @@ services:
     volumes:
       - timescale-data:/var/lib/postgresql/data
 
-  express:
+  api-server:
     image: node:14
-    container_name: express
-    working_dir: /app
+    container_name: api-server
+    working_dir: /app/api-server
     volumes:
       - ./:/app
-      - /app/node_modules
+      - /app/api-server/node_modules
+      - /app/shared/node_modules
     env_file:
       - .env
-    command: sh -c "npm install && npm start"
+    command: sh -c "cd /app && npm install && cd /app/api-server && npm install && npm start"
     ports:
       - "3000:3000"
+    depends_on:
+      - timescaledb
+
+  mqtt-server:
+    image: node:14
+    container_name: mqtt-server
+    working_dir: /app/mqtt-server
+    volumes:
+      - ./:/app
+      - /app/mqtt-server/node_modules
+      - /app/shared/node_modules
+    env_file:
+      - .env
+    command: sh -c "cd /app && npm install && cd /app/mqtt-server && npm install && npm start"
+    ports:
+      - "1883:1883"
     depends_on:
       - timescaledb
 

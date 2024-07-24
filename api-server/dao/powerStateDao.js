@@ -1,4 +1,4 @@
-const { PowerState } = require("../models");
+const { PowerState } = require("../../shared/models/index");
 
 const dao = {
   // 등록

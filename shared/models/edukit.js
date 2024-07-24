@@ -1,7 +1,7 @@
 const { Sequelize, DataTypes } = require('sequelize');
-const { sequelize } = require('./connection');
+const { sequelize } = require('../../shared/config/connection');
 
-module.exports = class PowerState extends Sequelize.Model {
+module.exports = class Edukit extends Sequelize.Model {
   static init(sequelize) {
     return super.init(
       {
@@ -10,8 +10,16 @@ module.exports = class PowerState extends Sequelize.Model {
           defaultValue: Sequelize.NOW,
           primaryKey: true
         },
+        tagId: {
+          type: DataTypes.INTEGER,
+          allowNull: false
+        },
+        name: {
+          type: DataTypes.STRING(150),
+          allowNull: false
+        },
         value: {
-          type: DataTypes.BOOLEAN,
+          type: DataTypes.TEXT,
           allowNull: false
         }
       },
@@ -25,7 +33,7 @@ module.exports = class PowerState extends Sequelize.Model {
 
   static async createHypertable() {
     await sequelize.query(`
-      SELECT create_hypertable('power_states', 'time', if_not_exists => TRUE);
+      SELECT create_hypertable('edukits', 'time', if_not_exists => TRUE);
     `);
   }
 };
