@@ -2,13 +2,14 @@ FROM node:16
 
 WORKDIR /app
 
+COPY package*.json ./
+RUN npm install
+
 COPY api-server/package*.json ./api-server/
-COPY shared/package*.json ./shared/
-
 RUN cd api-server && npm install
-RUN cd ../shared && npm install
 
-COPY . .
+COPY api-server/ ./api-server/
+COPY shared/ ./shared/
 
 WORKDIR /app/api-server
 

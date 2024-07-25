@@ -12,38 +12,50 @@ services:
       - "5433:5432"
     volumes:
       - timescale-data:/var/lib/postgresql/data
+    networks:
+      - my-network
 
   api-server:
-    build:
-      context: .
-      dockerfile: api-server/Dockerfile
+    image: copeve1015/api-server:latest
     container_name: api-server
     working_dir: /app/api-server
-    volumes:
-      - ./api-server:/app/api-server
-      - ./shared:/app/shared
     env_file:
       - .env
     ports:
       - "3000:3000"
     depends_on:
       - timescaledb
+    networks:
+      - my-network
 
   mqtt-ws-server:
-    build:
-      context: .
-      dockerfile: mqtt-ws-server/Dockerfile
+    image: copeve1015/mqtt-ws-server:latest
+    secrets:
+      - aws_iot_private_key
+      - aws_iot_certificate
+      - aws_iot_root_ca
     container_name: mqtt-ws-server
     working_dir: /app/mqtt-ws-server
-    volumes:
-      - ./mqtt-ws-server:/app/mqtt-ws-server
-      - ./shared:/app/shared
     env_file:
       - .env
     ports:
       - "3001:3001"
     depends_on:
       - timescaledb
+    networks:
+      - my-network
+
+secrets:
+  aws_iot_private_key:
+    file: ./secrets/private.pem.key
+  aws_iot_certificate:
+    file: ./secrets/certificate.pem.crt
+  aws_iot_root_ca:
+    file: ./secrets/root-ca.pem
 
 volumes:
   timescale-data:
+
+networks:
+  my-network:
+    driver: bridge
