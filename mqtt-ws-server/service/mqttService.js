@@ -16,8 +16,6 @@ const service = {
 
     const passCount = Number(array.find(obj => obj.tagId === "17").value);
     const failCount = Number(array.find(obj => obj.tagId === "44").value);
-
-    console.log(passCount, failCount, service.previousPassCount, service.previousFailCount, );
     // 양품 불량 체크
     try {
       // 서버 시작 시 초기화
@@ -86,7 +84,7 @@ const sendEdukitData = (array) => {
 
 const sendProductionData = async (passCount, failCount) => {
   const recentPowerState = await powerStateDao.findRecent();
-  if (recentPowerState.value) {
+  if (recentPowerState && recentPowerState.value) {
     const totalPassCount = await productionDao.sumValueAfterTimeByType({
       time: recentPowerState.time,
       type: 1
@@ -98,8 +96,8 @@ const sendProductionData = async (passCount, failCount) => {
     socketHandler.emitToRoom('production', 'production_data', {
       passCount: passCount ? passCount : 0,
       failCount: failCount ? failCount : 0,
-      totalPassCount: totalPassCount,
-      totalFailCount: totalFailCount,
+      totalPassCount: totalPassCount ? totalPassCount : 0,
+      totalFailCount: totalFailCount ? totalFailCount : 0,
     })
   }
 }
