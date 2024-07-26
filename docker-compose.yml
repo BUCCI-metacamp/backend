@@ -12,8 +12,6 @@ services:
       - "5433:5432"
     volumes:
       - timescale-data:/var/lib/postgresql/data
-    networks:
-      - my-network
 
   api-server:
     image: copeve1015/api-server:latest
@@ -25,8 +23,6 @@ services:
       - "3000:3000"
     depends_on:
       - timescaledb
-    networks:
-      - my-network
 
   mqtt-ws-server:
     image: copeve1015/mqtt-ws-server:latest
@@ -42,8 +38,6 @@ services:
       - "3001:3001"
     depends_on:
       - timescaledb
-    networks:
-      - my-network
 
 secrets:
   aws_iot_private_key:
@@ -55,7 +49,3 @@ secrets:
 
 volumes:
   timescale-data:
-
-networks:
-  my-network:
-    driver: bridge
