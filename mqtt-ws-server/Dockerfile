@@ -2,13 +2,14 @@ FROM node:16
 
 WORKDIR /app
 
+COPY package*.json ./
+RUN npm install
+
 COPY mqtt-ws-server/package*.json ./mqtt-ws-server/
-COPY shared/package*.json ./shared/
-
 RUN cd mqtt-ws-server && npm install
-RUN cd ../shared && npm install
 
-COPY . .
+COPY mqtt-ws-server/ ./mqtt-ws-server/
+COPY shared/ ./shared/
 
 WORKDIR /app/mqtt-ws-server
 
