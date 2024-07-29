@@ -1,7 +1,9 @@
+const axios = require('axios');
 const logger = require('../lib/logger');
 const socketHandler = require('../socket/socketHandler');
 const powerStateDao = require('../dao/powerStateDao');
 const productionDao = require('../dao/productionDao');
+const simulationResultDao = require('../dao/simulationResultDao');
 
 const service = {
   isProcessStart: false,
@@ -70,6 +72,38 @@ const service = {
         logger.error('(powerDataReceivedHandler)', error);
       }
     }
+  },
+
+  simulationDataReceivedHandler(data) {
+    try {
+      // 데이터 변환 전처리
+      // {
+      //   M01Duration(1호기 푸셔 속도): float,
+      //   M01Time(1호기 동작 간격): float,
+      //   M02Duration(2호기 푸셔 속도): float,
+      //   M02Time(2호기 작동 시간): float,
+      //   M03Duration(3호기 푸셔 속도): float,
+      //   M03Time(3호기 작동 시간): float,
+      //   ConvSpeedRatio(컨베이어 속도): float,
+      //   BenefitPerTime(시간당수익): float,
+      //   Benefit(총 수익): float,
+      //   Good(양품률 0~1사이): float,
+      // }
+
+      removeOutliersAndSendData(data);
+    } catch (error) {
+      logger.error('(simulationDataReceivedHandler)', error);
+    }
+  },
+
+  optimalRequestReceivedHandler() {
+    axios.get(`${process.env.AI_ENDPOINT}/predict`)
+      .then(response => {
+        logger.info('(optimalRequestReceivedHandler) Data sent to API:', response.data);
+      })
+      .catch(error => {
+        logger.error('(optimalRequestReceivedHandler) API request error:', error);
+      });
   }
 }
 
@@ -100,6 +134,35 @@ const sendProductionData = async (passCount, failCount) => {
       totalFailCount: totalFailCount ? totalFailCount : 0,
     })
   }
+}
+
+const removeOutliersAndSendData = async (dataArray) => {
+  logger.info(`(removeOutliersAndSendData) data: ${dataArray}`);
+  const goodValues = dataArray.map(data => data.Good);
+  const mean = goodValues.reduce((acc, val) => acc + val, 0) / goodValues.length;
+  const variance = goodValues.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0) / goodValues.length;
+  const stdDev = Math.sqrt(variance);
+
+  const lowerBound = mean - 1.4 * stdDev;
+  const upperBound = mean + 1.4 * stdDev;
+
+  logger.info(`(removeOutliersAndSendData) lowerBound: ${lowerBound}, upperBound: ${upperBound}`);
+
+  const filteredData = dataArray.filter(data => data.Good >= lowerBound && data.Good <= upperBound);
+  logger.info(`(removeOutliersAndSendData) filteredData: ${filteredData}`);
+
+  for (const data of filteredData) {
+    await simulationResultDao.insert(data);
+  }
+
+  // API 요청을 통해 ai 학습 서버로 데이터 전송
+  axios.post(`${process.env.AI_ENDPOINT}/train`, filteredData)
+    .then(response => {
+      logger.info('(simulationDataReceivedHandler) Data sent to API:', response.data);
+    })
+    .catch(error => {
+      logger.error('(simulationDataReceivedHandler) API request error:', error);
+    });
 }
 
 module.exports = service;

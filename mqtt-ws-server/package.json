@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "aws-iot-device-sdk": "^2.2.15",
+    "axios": "^1.7.2",
     "mqtt": "^5.8.1",
     "socket.io": "^4.7.5"
   }

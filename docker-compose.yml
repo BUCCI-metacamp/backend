@@ -39,6 +39,15 @@ services:
     depends_on:
       - timescaledb
 
+  ai-server:
+    image: copeve1015/ai-server:latest
+    container_name: ai-server
+    working_dir: /app/ai-server
+    ports:
+      - "8000:8000"
+    depends_on:
+      - timescaledb
+
 secrets:
   aws_iot_private_key:
     file: ./secrets/private.pem.key
