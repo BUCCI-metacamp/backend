@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+scikit-learn
+numpy
+pydantic
+joblib
+scipy
+scikit-optimize
+river
