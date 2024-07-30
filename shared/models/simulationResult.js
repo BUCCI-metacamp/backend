@@ -46,15 +46,42 @@ module.exports = class SimulationResult extends Sequelize.Model {
           type: DataTypes.DOUBLE,
           allowNull: false
         },
-        Good: {
+        GoodProductRatio: {
           type: DataTypes.DOUBLE,
           allowNull: false
-        }
+        },
+        Line01GoodProductRatio: {
+          type: DataTypes.DOUBLE,
+          allowNull: false
+        },
+        Line02GoodProductRatio: {
+          type: DataTypes.DOUBLE,
+          allowNull: false
+        },
+        Line03GoodProductRatio: {
+          type: DataTypes.DOUBLE,
+          allowNull: false
+        },
       },
       {
         sequelize,
         underscored: true, // true: underscored, false: camelCase
         timestamps: false,
+        indexes: [
+          {
+            name: 'idx_m01_m02_m03_conv',
+            fields: [
+              'm01_duration',
+              'm01_time',
+              'm02_duration',
+              'm02_time',
+              'm03_duration',
+              'm03_time',
+              'conv_speed_ratio'
+            ],
+            unique: false
+          }
+        ]
       }
     );
   }

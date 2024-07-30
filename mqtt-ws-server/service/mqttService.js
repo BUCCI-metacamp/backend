@@ -109,7 +109,7 @@ const service = {
 
 const sendEdukitData = (array) => {
   // socket edukit room에 전송 할 데이터 tagId
-  const edukitTagIds = ["0", "6", "37", "3", "2", "26", "27", "28", "29", "25", "24", "5", "40", "21", "22"];
+  const edukitTagIds = ["0", "4", "6", "37", "3", "2", "26", "27", "28", "29", "25", "24", "5", "40", "21", "22"];
 
   // 데이터 전송
   const filteredArray = array.filter(obj => edukitTagIds.includes(obj.tagId));
@@ -136,33 +136,59 @@ const sendProductionData = async (passCount, failCount) => {
   }
 }
 
-const removeOutliersAndSendData = async (dataArray) => {
-  logger.info(`(removeOutliersAndSendData) data: ${dataArray}`);
-  const goodValues = dataArray.map(data => data.Good);
-  const mean = goodValues.reduce((acc, val) => acc + val, 0) / goodValues.length;
-  const variance = goodValues.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0) / goodValues.length;
-  const stdDev = Math.sqrt(variance);
+const removeOutliersAndSendData = async (data) => {
+  try {
+    logger.info(`(removeOutliersAndSendData) data: ${data}`);
 
-  const lowerBound = mean - 1.4 * stdDev;
-  const upperBound = mean + 1.4 * stdDev;
-
-  logger.info(`(removeOutliersAndSendData) lowerBound: ${lowerBound}, upperBound: ${upperBound}`);
-
-  const filteredData = dataArray.filter(data => data.Good >= lowerBound && data.Good <= upperBound);
-  logger.info(`(removeOutliersAndSendData) filteredData: ${filteredData}`);
-
-  for (const data of filteredData) {
+    // db에 저장
     await simulationResultDao.insert(data);
-  }
 
-  // API 요청을 통해 ai 학습 서버로 데이터 전송
-  axios.post(`${process.env.AI_ENDPOINT}/train`, filteredData)
-    .then(response => {
-      logger.info('(simulationDataReceivedHandler) Data sent to API:', response.data);
-    })
-    .catch(error => {
-      logger.error('(simulationDataReceivedHandler) API request error:', error);
-    });
+    const dataArray = await simulationResultDao.findAllByValues(data);
+
+    const goodValues = dataArray.map(value => value.GoodProductRatio);
+    const mean = goodValues.reduce((acc, val) => acc + val, 0) / goodValues.length;
+    const variance = goodValues.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0) / goodValues.length;
+    const stdDev = Math.sqrt(variance);
+
+    const lowerBound = mean - 1.4 * stdDev;
+    const upperBound = mean + 1.4 * stdDev;
+
+    logger.info(`(removeOutliersAndSendData) lowerBound: ${lowerBound}, upperBound: ${upperBound}`);
+
+    if (data.GoodProductRatio >= lowerBound && data.GoodProductRatio <= upperBound) {
+      const requestData = {
+        "values": {
+          "M01Duration": data.M01Duration,
+          "M01Time": data.M01Time,
+          "M02Duration": data.M02Duration,
+          "M02Time": data.M02Time,
+          "M03Duration": data.M03Duration,
+          "M03Time": data.M03Time,
+          "ConvSpeedRatio": data.ConvSpeedRatio,
+        },
+        "targets": {
+          "BenefitPerTime": data.BenefitPerTime,
+          "Benefit": data.Benefit,
+          "GoodProductRatio": data.GoodProductRatio,
+          "Line01GoodProductRatio": data.Line01GoodProductRatio,
+          "Line02GoodProductRatio": data.Line02GoodProductRatio,
+          "Line03GoodProductRatio": data.Line03GoodProductRatio,
+        }
+      }
+      // API 요청을 통해 ai 학습 서버로 데이터 전송
+      axios.post(`${process.env.AI_ENDPOINT}/train`, requestData)
+        .then(response => {
+          logger.info('(simulationDataReceivedHandler) Data sent to API:', response.data);
+        })
+        .catch(error => {
+          logger.error('(simulationDataReceivedHandler) API request error:', error);
+        });
+    } else {
+      logger.info(`(removeOutliersAndSendData) Outlier detected. GoodProductRatio: ${GoodProductRatio}.`);
+    }
+  } catch (error) {
+    logger.error(`(removeOutliersAndSendData) error: ${error.toString()}`)
+  }
 }
 
 module.exports = service;

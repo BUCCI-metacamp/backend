@@ -6,3 +6,4 @@ pydantic
 joblib
 scipy
 scikit-optimize
+river
