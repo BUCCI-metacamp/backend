@@ -38,6 +38,42 @@ const service = {
     });
   },
 
+  // 모든 유저 조회
+  async list(params) {
+    let results = null;
+    try {
+      results = await userDao.findAll();
+      logger.debug(`(userService.list) ${JSON.stringify(results)}`);
+    } catch (error) {
+      logger.error(`(userService.list) ${error.toString()}`);
+      return new Promise((resolve, reject) => {
+        reject(error);
+      });
+    }
+
+    return new Promise((resolve) => {
+      resolve(results);
+    });
+  },
+
+  // 단일 유저 조회
+  async detail(params) {
+    let result = null;
+    try {
+      result = await userDao.findById(params);
+      logger.debug(`(userService.detail) ${JSON.stringify(result)}`);
+    } catch (error) {
+      logger.error(`(userService.detail) ${error.toString()}`);
+      return new Promise((resolve, reject) => {
+        reject(error);
+      });
+    }
+
+    return new Promise((resolve) => {
+      resolve(result);
+    });
+  },
+
   // 아이디 중복 체크
   async checkDuplicate(params) {
     let result = null;
