@@ -1,6 +1,16 @@
-version: '3.8'
+version: '3.3'
 
 services:
+  mosquitto:
+    image: eclipse-mosquitto:latest
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./mosquitto-storage/conf:/mosquitto/config/
+      - ./mosquitto-storage/data:/mosquitto/data:rw
+      - ./mosquitto-storage/log:/mosquitto/log:rw
+
   timescaledb:
     image: timescale/timescaledb:latest-pg16
     container_name: timescaledb
@@ -9,7 +19,7 @@ services:
       POSTGRES_USER: ${DB_ID}
       POSTGRES_PASSWORD: ${DB_PASS}
     ports:
-      - "5433:5432"
+      - "5432:5432"
     volumes:
       - timescale-data:/var/lib/postgresql/data
 
@@ -26,10 +36,6 @@ services:
 
   mqtt-ws-server:
     image: copeve1015/mqtt-ws-server:latest
-    secrets:
-      - aws_iot_private_key
-      - aws_iot_certificate
-      - aws_iot_root_ca
     container_name: mqtt-ws-server
     working_dir: /app/mqtt-ws-server
     env_file:
@@ -47,14 +53,6 @@ services:
       - "8000:8000"
     depends_on:
       - timescaledb
-
-secrets:
-  aws_iot_private_key:
-    file: ./secrets/private.pem.key
-  aws_iot_certificate:
-    file: ./secrets/certificate.pem.crt
-  aws_iot_root_ca:
-    file: ./secrets/root-ca.pem
 
 volumes:
   timescale-data:
