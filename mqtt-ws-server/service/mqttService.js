@@ -52,7 +52,7 @@ const service = {
         service.previousFailCount = 0;
       }
     } catch (error) {
-      logger.error('(statusDataReceivedHandler)', error);
+      logger.error(`(statusDataReceivedHandler) ${error.toString()}`);
     }
 
     sendProductionData(passCount, failCount);
@@ -69,41 +69,32 @@ const service = {
         socketHandler.emitToRoom('edukit', 'change_power', data);
         socketHandler.emitToRoom('production', 'change_power', data);
       } catch (error) {
-        logger.error('(powerDataReceivedHandler)', error);
+        logger.error(`(powerDataReceivedHandler) ${error.toString()}`);
       }
     }
   },
 
   simulationDataReceivedHandler(data) {
     try {
-      // 데이터 변환 전처리
-      // {
-      //   M01Duration(1호기 푸셔 속도): float,
-      //   M01Time(1호기 동작 간격): float,
-      //   M02Duration(2호기 푸셔 속도): float,
-      //   M02Time(2호기 작동 시간): float,
-      //   M03Duration(3호기 푸셔 속도): float,
-      //   M03Time(3호기 작동 시간): float,
-      //   ConvSpeedRatio(컨베이어 속도): float,
-      //   BenefitPerTime(시간당수익): float,
-      //   Benefit(총 수익): float,
-      //   Good(양품률 0~1사이): float,
-      // }
-
       removeOutliersAndSendData(data);
     } catch (error) {
-      logger.error('(simulationDataReceivedHandler)', error);
+      logger.error(`(simulationDataReceivedHandler) ${error.toString()}`);
     }
   },
 
-  optimalRequestReceivedHandler() {
-    axios.get(`${process.env.AI_ENDPOINT}/predict`)
-      .then(response => {
-        logger.info('(optimalRequestReceivedHandler) Data sent to API:', response.data);
-      })
-      .catch(error => {
-        logger.error('(optimalRequestReceivedHandler) API request error:', error);
-      });
+  simulationRequestReceivedHandler(data, client) {
+    logger.info(`(simulationRequestReceivedHandler) ${data.toString()}`);
+    try {
+      const tag = parseInt(data.request);
+      if (tag === 0) {
+        sendOptimalData(client);
+      }
+      else if (tag === 1) {
+        resetAIModel();
+      }
+    } catch (error) {
+      logger.error(`(simulationRequestReceivedHandler) ${error.toString()}`);
+    }
   }
 }
 
@@ -189,6 +180,50 @@ const removeOutliersAndSendData = async (data) => {
   } catch (error) {
     logger.error(`(removeOutliersAndSendData) error: ${error.toString()}`)
   }
+}
+
+const sendOptimalData = async (client) => {
+  const dict = {
+    "BenefitPerTime": 0,
+    "Benefit": 1,
+    "GoodProductRatio": 2
+  }
+  axios.get(`${process.env.AI_ENDPOINT}/predict`)
+    .then(response => {
+      const inputData = response.data
+      let transformedData = [];
+      for (const [key, values] of Object.entries(inputData)) {
+        transformedData.push({
+          target: dict[key],
+          targetValue: values.best_target_value,
+          M01Duration: values.best_values.M01Duration,
+          M01Time: values.best_values.M01Time,
+          M02Duration: values.best_values.M02Duration,
+          M02Time: values.best_values.M02Time,
+          M03Duration: values.best_values.M03Duration,
+          M03Time: values.best_values.M03Time,
+          ConvSpeedRatio: values.best_values.ConvSpeedRatio,
+          Line01GoodProductRatio: values.best_values.Line01GoodProductRatio,
+          Line02GoodProductRatio: values.best_values.Line02GoodProductRatio,
+          Line03GoodProductRatio: values.best_values.Line03GoodProductRatio
+        });
+      }
+      transformedData.forEach(data => client.publish('simulation/optimal/data', JSON.stringify(data)));
+      logger.info(`(simulationRequestReceivedHandler) Data: ${transformed_data}`);
+    })
+    .catch(error => {
+      logger.error(`(simulationRequestReceivedHandler) API request error: ${error.toString()}`);
+    });
+}
+
+const resetAIModel = async () => {
+  axios.post(`${process.env.AI_ENDPOINT}/reset`)
+    .then(response => {
+      logger.info('(simulationDataReceivedHandler) Data sent to API:', response.data);
+    })
+    .catch(error => {
+      logger.error('(simulationDataReceivedHandler) API request error:', error);
+    });
 }
 
 module.exports = service;

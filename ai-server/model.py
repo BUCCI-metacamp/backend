@@ -9,7 +9,6 @@ class OnlineModel:
         self.model_path = model_path
         self.targets = ['BenefitPerTime', 'Benefit', 'GoodProductRatio', 'Line01GoodProductRatio', 'Line02GoodProductRatio', 'Line03GoodProductRatio']
         self.model = {target: forest.AMFRegressor(n_estimators=3, seed=42) for target in self.targets}
-        self.model_initialized = False
         self.load_model()
 
     def update_model(self, values, targets):
@@ -21,6 +20,12 @@ class OnlineModel:
             for target, value in targets.items():
                 self.model[target].learn_one(values, value)
         self.save_model()
+        
+    def reset_model(self, model_path="model.joblib"):
+        self.targets = ['BenefitPerTime', 'Benefit', 'GoodProductRatio', 'Line01GoodProductRatio', 'Line02GoodProductRatio', 'Line03GoodProductRatio']
+        self.model = {target: forest.AMFRegressor(n_estimators=3, seed=42) for target in self.targets}
+        self.model_initialized = False
+        self.delete_model()
 
     def predict_optimal_value(self):
         if not self.model_initialized:
@@ -28,17 +33,18 @@ class OnlineModel:
           
         bounds = [
             (0.1, 1.0),  # 1번 기계 푸셔 속도 비율
-            (1.0, 10.0),  # 1번 기계 작동 간격 (초)
+            (1.0, 10.0),  # 1번 기계 작동 간격
             (0.1, 1.0),  # 2번 기계 푸셔 속도 비율
-            (1.0, 10.0),  # 2번 기계 동작 시간 (초)
+            (1.0, 10.0),  # 2번 기계 동작 시간
             (0.1, 1.0),  # 3번 기계 푸셔 속도 비율
-            (1.0, 10.0),  # 3번 기계 동작 시간 (초)
+            (1.0, 10.0),  # 3번 기계 동작 시간
             (0.05, 1.0)   # 컨베이어 속도 비율
         ]
         
         results = {}
-        for target in self.targets:
-            best_values, best_target_value = self._optimize_lbfgsb(bounds, target)
+        targets = ['BenefitPerTime', 'Benefit', 'GoodProductRatio']
+        for target in targets:
+            best_values, best_target_value = self._optimize_de(bounds, target)
             results[target] = {
                 "best_values": best_values,
                 "best_target_value": best_target_value,
@@ -46,7 +52,7 @@ class OnlineModel:
 
         return results
       
-    def _optimize_lbfgsb(self, bounds, target):
+    def _optimize_de(self, bounds, target):
         def objective(x):
             input_dict = dict(zip(
                 ['M01Duration', 'M01Time', 'M02Duration', 'M02Time',
@@ -65,6 +71,12 @@ class OnlineModel:
              'M03Duration', 'M03Time', 'ConvSpeedRatio'],
             result.x
         ))
+        
+        additional_targets = ['Line01GoodProductRatio', 'Line02GoodProductRatio', 'Line03GoodProductRatio']
+        additional_input_dict = best_values.copy()
+        for additional_target in additional_targets:
+            best_values[additional_target] = self.model[additional_target].predict_one(additional_input_dict)
+        
         best_target_value = -result.fun
         
         return best_values, best_target_value
@@ -77,3 +89,9 @@ class OnlineModel:
             self.model, self.model_initialized = joblib.load(self.model_path)
         else:
             self.model_initialized = False
+            
+    def delete_model(self):
+        if os.path.exists(self.model_path):
+            os.remove(self.model_path)
+        else:
+            print("Model file does not exist.")

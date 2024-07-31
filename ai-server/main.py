@@ -30,9 +30,6 @@ class OptimizationResults(BaseModel):
     BenefitPerTime: OptimizationResult
     Benefit: OptimizationResult
     GoodProductRatio: OptimizationResult
-    Line01GoodProductRatio: OptimizationResult
-    Line02GoodProductRatio: OptimizationResult
-    Line03GoodProductRatio: OptimizationResult
 
 @app.post("/train")
 async def train(data: SpeedData):
@@ -56,7 +53,7 @@ async def train(data: SpeedData):
     
     return {"message": "Model updated with new data"}
 
-@app.post("/predict", response_model=OptimizationResults)
+@app.get("/predict", response_model=OptimizationResults)
 async def predict():
     try:
         result = model.predict_optimal_value()
@@ -64,3 +61,13 @@ async def predict():
         raise HTTPException(status_code=400, detail=str(e))
 
     return result
+
+@app.post("/reset")
+async def reset():
+    try:
+        result = model.reset_model()
+    except Exception as e:
+        logger.error(f"Error reset model: {e}")  # Log the error
+        raise HTTPException(status_code=500, detail=str(e))
+
+    return {"message": "Model reset"}
