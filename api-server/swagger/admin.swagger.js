@@ -1,5 +1,165 @@
 /**
  * @swagger
+ * /admin/users/{id}:
+ *  get:
+ *    summary: 단일 유저 조회
+ *    description: 사용자 ID를 통해 단일 유저를 조회합니다.
+ *    tags: [Admin]
+ *    parameters:
+ *      - in: path
+ *        name: id
+ *        required: true
+ *        schema:
+ *          type: integer
+ *        description: 조회할 사용자 ID
+ *    security:
+ *      - bearerAuth: []
+ *    responses:
+ *      200:
+ *        description: 단일 사용자 객체를 반환합니다.
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                id:
+ *                  type: integer
+ *                name:
+ *                  type: string
+ *                email:
+ *                  type: string
+ *                createdAt:
+ *                  type: string
+ *                  format: date-time
+ *                updatedAt:
+ *                  type: string
+ *                  format: date-time
+ *              example:
+ *                id: 1
+ *                name: "John Doe"
+ *                email: "john.doe@example.com"
+ *                createdAt: "2024-01-01T00:00:00.000Z"
+ *                updatedAt: "2024-01-01T00:00:00.000Z"
+ *      401:
+ *        description: 인증 실패
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                error:
+ *                  type: string
+ *                  description: 오류 메시지
+ *              example:
+ *                error: "Unauthorized"
+ *      403:
+ *        description: 권한 부족 (관리자가 아닌 경우)
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                error:
+ *                  type: string
+ *                  description: 오류 메시지
+ *              example:
+ *                error: "Forbidden"
+ *      500:
+ *        description: 서버 오류
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                error:
+ *                  type: string
+ *                  description: 오류 메시지
+ *              example:
+ *                error: "서버 오류 발생"
+ */
+
+/**
+ * @swagger
+ * /admin/users:
+ *  get:
+ *    summary: 전체 유저 조회
+ *    description: 전체 유저를 조회합니다.
+ *    tags: [Admin]
+ *    security:
+ *      - bearerAuth: []
+ *    responses:
+ *      200:
+ *        description: 유저 객체의 리스트를 반환합니다.
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: array
+ *              items:
+ *                type: object
+ *                properties:
+ *                  id:
+ *                    type: integer
+ *                  name:
+ *                    type: string
+ *                  email:
+ *                    type: string
+ *                  createdAt:
+ *                    type: string
+ *                    format: date-time
+ *                  updatedAt:
+ *                    type: string
+ *                    format: date-time
+ *              example:
+ *                - id: 1
+ *                  name: "John Doe"
+ *                  email: "john.doe@example.com"
+ *                  createdAt: "2024-01-01T00:00:00.000Z"
+ *                  updatedAt: "2024-01-01T00:00:00.000Z"
+ *                - id: 2
+ *                  name: "Jane Smith"
+ *                  email: "jane.smith@example.com"
+ *                  createdAt: "2024-01-02T00:00:00.000Z"
+ *                  updatedAt: "2024-01-02T00:00:00.000Z"
+ *      401:
+ *        description: 인증 실패
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                error:
+ *                  type: string
+ *                  description: 오류 메시지
+ *              example:
+ *                error: "Unauthorized"
+ *      403:
+ *        description: 권한 부족 (관리자가 아닌 경우)
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                error:
+ *                  type: string
+ *                  description: 오류 메시지
+ *              example:
+ *                error: "Forbidden"
+ *      500:
+ *        description: 서버 오류
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                error:
+ *                  type: string
+ *                  description: 오류 메시지
+ *              example:
+ *                error: "서버 오류 발생"
+ */
+
+/**
+ * @swagger
  * /admin/users/{id}/role:
  *  put:
  *    summary: 사용자 역할 수정

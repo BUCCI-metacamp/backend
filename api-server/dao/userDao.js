@@ -16,6 +16,37 @@ const dao = {
     });
   },
 
+  // 모든 유저 조회
+  findAll() {
+    return new Promise((resolve, reject) => {
+      User.findAll()
+        .then((users) => {
+          const sanitizedUsers = users.map(user => {
+            const { password, ...userWithoutPassword } = user.toJSON();
+            return userWithoutPassword;
+          });
+          resolve(sanitizedUsers);
+        })
+        .catch((err) => {
+          reject(err);
+        });
+    });
+  },
+
+  // 단일 유저 조회
+  findById(params) {
+    return new Promise((resolve, reject) => {
+      User.findByPk(params.id)
+        .then((user) => {
+          const { password, ...userWithoutPassword } = user?.toJSON();
+          resolve(userWithoutPassword);
+        })
+        .catch((err) => {
+          reject(err);
+        });
+    });
+  },
+
   // 아이디 조회
   findByUserId(params) {
     return new Promise((resolve, reject) => {
@@ -57,7 +88,7 @@ const dao = {
           reject(err);
         });
     });
-  }, 
+  },
 
   // 유저 삭제
   delete(params) {
