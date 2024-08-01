@@ -208,7 +208,7 @@ const sendOptimalData = async (client) => {
           Line03GoodProductRatio: values.best_values.Line03GoodProductRatio
         });
       }
-      transformedData.forEach(data => client.publish('simulation/optimal/data', JSON.stringify(data)));
+      client.publish('simulation/optimal/data', JSON.stringify(transformedData))
       logger.info(`(simulationRequestReceivedHandler) Data: ${transformed_data}`);
     })
     .catch(error => {
@@ -217,13 +217,14 @@ const sendOptimalData = async (client) => {
 }
 
 const resetAIModel = async () => {
-  axios.post(`${process.env.AI_ENDPOINT}/reset`)
-    .then(response => {
-      logger.info('(simulationDataReceivedHandler) Data sent to API:', response.data);
-    })
-    .catch(error => {
-      logger.error('(simulationDataReceivedHandler) API request error:', error);
-    });
+  logger.info('reset model');
+  // axios.post(`${process.env.AI_ENDPOINT}/reset`)
+  //   .then(response => {
+  //     logger.info('(simulationDataReceivedHandler) Data sent to API:', response.data);
+  //   })
+  //   .catch(error => {
+  //     logger.error('(simulationDataReceivedHandler) API request error:', error);
+  //   });
 }
 
 module.exports = service;
