@@ -74,7 +74,10 @@ const service = {
 
   powerDataReceivedHandler(data) {
     // data가 들어온 적 없거나 이전과 다를 경우
-    if (service.previousPowerState == null || service.previousPowerState != data) {
+    if (service.previousPowerState == null) {
+      service.previousPowerState = data;
+    }
+    else if (service.previousPowerState != data) {
       try {
         service.previousPowerState = data;
         powerStateDao.insert({
@@ -82,6 +85,7 @@ const service = {
         });
         socketHandler.emitToRoom('edukit', 'change_power', data);
         socketHandler.emitToRoom('production', 'change_power', data);
+        socketHandler.emitToRoom('uptime', 'change_power', data);
       } catch (error) {
         logger.error(`(powerDataReceivedHandler) ${error.toString()}`);
       }
@@ -114,7 +118,7 @@ const service = {
 
 const sendEdukitData = (array) => {
   // socket edukit room에 전송 할 데이터 tagId
-  const edukitTagIds = ["0", "4", "6", "9", "10", "11", "35", "37", "3", "2", "26", "27", "28", "29", "25", "24", "5", "40", "21", "22"];
+  const edukitTagIds = ["0", "4", "6", "8", "9", "10", "11", "35", "37", "3", "2", "26", "27", "28", "29", "25", "24", "5", "40", "21", "22"];
 
   // 데이터 전송
   const filteredArray = array.filter(obj => edukitTagIds.includes(obj.tagId));
@@ -263,7 +267,7 @@ const sendOptimalData = async (client) => {
         });
       }
       client.publish('simulation/optimal/data', JSON.stringify(transformedData))
-      logger.info(`(simulationRequestReceivedHandler) Data: ${transformed_data}`);
+      logger.info(`(simulationRequestReceivedHandler) Data: ${transformedData}`);
     })
     .catch(error => {
       logger.error(`(simulationRequestReceivedHandler) API request error: ${error.toString()}`);
