@@ -1,3 +1,4 @@
+const logger = require("../lib/logger");
 const tokenUtil = require("../lib/tokenUtil");
 
 let ioInstance;
@@ -29,6 +30,7 @@ const socketHandler = (io) => {
 
     // 방에 연결
     socket.on('request_join_room', (roomName) => {
+      logger.info(`${roomName} joined`);
       socket.join(roomName);
     });
 
@@ -42,6 +44,7 @@ const socketHandler = (io) => {
 
 socketHandler.emitToRoom = (room, event, data) => {
   if (ioInstance) {
+    logger.info(`room:${room} - ${event} : ${data}`)
     ioInstance.to(room).emit(event, data);
   }
 };
