@@ -173,7 +173,7 @@ const service = {
 
     try {
       user = await userDao.findByPk(params);
-      const {password, ...info} = user;
+      const { password, ...info } = user;
       result = info;
       logger.debug(`(userService.info) ${JSON.stringify(result)}`);
     } catch (error) {
@@ -211,15 +211,22 @@ const service = {
     });
   },
 
-  // 권한 수정
-  async updateRole(params) {
+  // 유저 정보 수정
+  async update(params) {
     let updated = null;
 
     try {
-      updated = await userDao.update({
+      let newParams = {
         id: params.id,
+        name: params.name,
         role: params.role,
-      });
+      }
+      if (params.password != null) {
+        hashPassword = await hashUtil.makePasswordHash(params.password);
+        logger.debug(`userService.update - hashPassword: ${JSON.stringify(hashPassword)}`);
+        newParams.password = hashPassword;
+      }
+      updated = await userDao.update(newParams);
     } catch (error) {
       logger.error(`(userService.updateRole) ${error.toString()}`);
       return new Promise((resolve, reject) => {

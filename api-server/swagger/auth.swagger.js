@@ -20,6 +20,8 @@
  *                type: string
  *              role:
  *                type: string
+ *    security:
+ *      - bearerAuth: []
  *    responses:
  *      201:
  *        description: 성공
@@ -142,6 +144,8 @@
  *          type: string
  *        required: true
  *        description: 클라이언트에서 발급된 refreshToken 쿠키
+ *    security:
+ *      - bearerAuth: []
  *    responses:
  *      200:
  *        description: 새로운 accessToken이 발급됨

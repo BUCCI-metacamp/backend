@@ -19,6 +19,22 @@ const dao = {
     return new Promise((resolve, reject) => {
       PowerState.findOne({ order: [["time", "DESC"]] })
        .then((recent) => {
+          resolve(recent.toJSON());
+        })
+       .catch((err) => {
+          reject(err);
+        });
+    });
+  },
+
+  // 최근 시작 시간 조회
+  findOnRecent() {
+    return new Promise((resolve, reject) => {
+      PowerState.findOne({
+        where: { value: true },
+        order: [["time", "DESC"]]
+      })
+       .then((recent) => {
           resolve(recent);
         })
        .catch((err) => {
@@ -26,6 +42,7 @@ const dao = {
         });
     });
   }
+
 }
 
 module.exports = dao;

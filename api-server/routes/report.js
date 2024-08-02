@@ -13,6 +13,11 @@ router.post('/', isLoggedIn, async (req, res, next) => {
       userId: req.user.id,
       title: req.body.title,
       content: req.body.content,
+      startTime: req.body.startTime,
+      uptime: req.body.uptime,
+      finalTime: req.body.finalTime,
+      good: req.body.good,
+      bad: req.body.bad,
     }
     logger.info(`(report.reg.params) ${JSON.stringify(params)}`);
 
@@ -29,12 +34,28 @@ router.post('/', isLoggedIn, async (req, res, next) => {
   }
 })
 
+// 업무 일지 데이터 조회
+router.get('/product-data', isLoggedIn, async (req, res, next) => {
+  try {
+    const result = await reportService.productData();
+    logger.info(`(report.product-data.result)) ${JSON.stringify(result)}`);
+
+    res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+})
+
 // 업무 일지 리스트
-router.get('/', isLoggedIn, checkRole(['admin']), async (req, res, next) => {
+router.get('/', isLoggedIn, async (req, res, next) => {
   try {
     const params = {
+      user: req.user,
       limit: req.query.limit || 10,
       page: req.query.page || 1,
+      title: req.query.title,
+      content: req.query.content,
+      userName: req.query.userName,
     }
     logger.info(`(report.list.params) ${JSON.stringify(params)}`);
     const result = await reportService.list(params);
@@ -61,5 +82,6 @@ router.get('/:id', isLoggedIn, checkRole(['admin']), async (req, res, next) => {
     next(error);
   }
 })
+
 
 module.exports = router;

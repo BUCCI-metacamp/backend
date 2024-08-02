@@ -40,13 +40,16 @@ router.put('/users/:id/role', async (req, res, next) => {
   try {
     const params = {
       id: req.params.id,
+      name: req.body.name,
+      password: req.body.password || null,
       role: req.body.role,
     }
-    if (!params.role) {
+
+    if (!params.role || !params.name || !req.params.id) {
       throw new CustomError(400, 'Bad Request');
     } else {
       logger.info(`(admin.user.role.params) ${JSON.stringify(params)}`);
-      const result = await userService.updateRole(params);
+      const result = await userService.update(params);
       logger.info(`(admin.user.updateRole.result) ${JSON.stringify(result)}`);
       res.status(200).json(result);
     }

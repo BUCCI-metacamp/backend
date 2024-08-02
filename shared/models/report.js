@@ -12,6 +12,26 @@ module.exports = class Report extends Sequelize.Model {
           type: Sequelize.TEXT,
           allowNull: false,
         },
+        startTime: {
+          type: Sequelize.STRING(100),
+          allowNull: true,
+        },
+        uptime: {
+          type: Sequelize.STRING(100),
+          allowNull: true,
+        },
+        finalTime: {
+          type: Sequelize.STRING(100),
+          allowNull: true,
+        },
+        good: {
+          type: Sequelize.INTEGER,
+          allowNull: true,
+        },
+        bad: {
+          type: Sequelize.INTEGER,
+          allowNull: true,
+        }
       },
       {
         sequelize,

@@ -5,6 +5,7 @@ const Edukit = require('./edukit');
 const PowerState = require('./powerState');
 const Production = require('./production');
 const SimulationResult = require('./simulationResult');
+const Operation = require('./operation');
 
 const db = {};
 
@@ -17,6 +18,7 @@ db.Edukit = Edukit;
 db.PowerState = PowerState;
 db.Production = Production;
 db.SimulationResult = SimulationResult;
+db.Operation = Operation;
 
 console.log(Object.keys(db));
 // model init
