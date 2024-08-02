@@ -162,8 +162,8 @@
  * @swagger
  * /admin/users/{id}/role:
  *  put:
- *    summary: 사용자 역할 수정
- *    description: 관리자가 사용자의 역할을 수정합니다.
+ *    summary: 사용자 정보 수정
+ *    description: 관리자가 사용자의 정보를 수정합니다.
  *    tags: [Admin]
  *    parameters:
  *      - in: path
@@ -182,10 +182,18 @@
  *              role:
  *                type: string
  *                description: 새 역할
+ *              name:
+ *                type: string
+ *                description: 새 이름
+ *              password:
+ *                type: string
+ *                description: 새 패스워드
  *            required:
  *              - role
+ *              - name
  *            example:
  *              role: "admin"
+ *              name: "이름"
  *    security:
  *      - bearerAuth: []
  *    responses:

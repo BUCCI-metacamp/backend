@@ -4,6 +4,7 @@ const socketHandler = require('../socket/socketHandler');
 const powerStateDao = require('../dao/powerStateDao');
 const productionDao = require('../dao/productionDao');
 const simulationResultDao = require('../dao/simulationResultDao');
+const operationDao = require('../dao/operationDao');
 
 const service = {
   isProcessStart: false,
@@ -16,8 +17,21 @@ const service = {
     sendEdukitData(array);
     const time = array.find(obj => obj.tagId === "0");
 
+    const startState = array.find(obj => obj.tagId === "1").value;
+
     const passCount = Number(array.find(obj => obj.tagId === "17").value);
     const failCount = Number(array.find(obj => obj.tagId === "44").value);
+    try {
+      // 공정 상태 변경 처리
+      if (service.isProcessStart ^ startState) {
+        operationDao.insert({
+          value: startState,
+        });
+        service.isProcessStart = startState;
+      }
+    } catch (error) {
+      logger.error(`(statusDataReceivedHandler)-startState ${error.toString()}`);
+    }
     // 양품 불량 체크
     try {
       // 서버 시작 시 초기화
@@ -100,7 +114,7 @@ const service = {
 
 const sendEdukitData = (array) => {
   // socket edukit room에 전송 할 데이터 tagId
-  const edukitTagIds = ["0", "4", "6", "37", "3", "2", "26", "27", "28", "29", "25", "24", "5", "40", "21", "22"];
+  const edukitTagIds = ["0", "4", "6", "9", "10", "11", "35", "37", "3", "2", "26", "27", "28", "29", "25", "24", "5", "40", "21", "22"];
 
   // 데이터 전송
   const filteredArray = array.filter(obj => edukitTagIds.includes(obj.tagId));
@@ -118,11 +132,51 @@ const sendProductionData = async (passCount, failCount) => {
       time: recentPowerState.time,
       type: 0
     });
+    const totalCountLog = [];
+    const failCountLog = [];
+
+    const recentOperations = await operationDao.findRecentWithLimit(20);
+
+    let count = 0;
+    for (const [i, operation] of recentOperations.entries()) {
+      console.log(operation);
+      if (i > 0 && !recentOperations[i - 1].value && operation.value) {
+        const startTime = recentPowerState.time
+        const endTime = recentOperations[i - 1].time;
+
+        console.log(startTime, '~', endTime, startTime > endTime);
+
+        if (startTime > endTime) break;
+
+
+        // true ~ false 인 시간 동안의 pass와 fail count를 productionDao를 통해 조회
+        const passCount = await productionDao.sumValueBetweenTimesByType({
+          startTime,
+          endTime,
+          type: 1
+        });
+        const failCount = await productionDao.sumValueBetweenTimesByType({
+          startTime,
+          endTime,
+          type: 0
+        });
+
+        // 배열에 담기
+        totalCountLog.push({ time: endTime, totalCount: passCount + failCount });
+        failCountLog.push({ time: endTime, totalCount: failCount });
+
+        count++;
+        if (count === 5) break;
+      }
+    }
+
     socketHandler.emitToRoom('production', 'production_data', {
       passCount: passCount ? passCount : 0,
       failCount: failCount ? failCount : 0,
       totalPassCount: totalPassCount ? totalPassCount : 0,
       totalFailCount: totalFailCount ? totalFailCount : 0,
+      totalCountLog: totalCountLog,
+      failCountLog: failCountLog,
     })
   }
 }
@@ -195,17 +249,17 @@ const sendOptimalData = async (client) => {
       for (const [key, values] of Object.entries(inputData)) {
         transformedData.push({
           target: dict[key],
-          targetValue: values.best_target_value,
-          M01Duration: values.best_values.M01Duration,
-          M01Time: values.best_values.M01Time,
-          M02Duration: values.best_values.M02Duration,
-          M02Time: values.best_values.M02Time,
-          M03Duration: values.best_values.M03Duration,
-          M03Time: values.best_values.M03Time,
-          ConvSpeedRatio: values.best_values.ConvSpeedRatio,
-          Line01GoodProductRatio: values.best_values.Line01GoodProductRatio,
-          Line02GoodProductRatio: values.best_values.Line02GoodProductRatio,
-          Line03GoodProductRatio: values.best_values.Line03GoodProductRatio
+          targetValue: (key == "GoodProductRatio" ? (values.best_target_value * 100).toFixed(2) : values.best_target_value.toFixed(2)),
+          M01Duration: values.best_values.M01Duration.toFixed(2),
+          M01Time: values.best_values.M01Time.toFixed(2),
+          M02Duration: values.best_values.M02Duration.toFixed(2),
+          M02Time: values.best_values.M02Time.toFixed(2),
+          M03Duration: values.best_values.M03Duration.toFixed(2),
+          M03Time: values.best_values.M03Time.toFixed(2),
+          ConvSpeedRatio: values.best_values.ConvSpeedRatio.toFixed(2),
+          Line01GoodProductRatio: (values.best_values.Line01GoodProductRatio * 100).toFixed(2),
+          Line02GoodProductRatio: (values.best_values.Line02GoodProductRatio * 100).toFixed(2),
+          Line03GoodProductRatio: (values.best_values.Line03GoodProductRatio * 100).toFixed(2),
         });
       }
       client.publish('simulation/optimal/data', JSON.stringify(transformedData))

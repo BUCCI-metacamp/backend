@@ -110,6 +110,21 @@
  *          type: integer
  *          default: 1
  *        description: 조회할 페이지 번호
+ *      - in: query
+ *        name: title
+ *        schema:
+ *          type: string
+ *        description: 조회할 제목
+ *      - in: query
+ *        name: content
+ *        schema:
+ *          type: string
+ *        description: 조회할 내용
+ *      - in: query
+ *        name: userName
+ *        schema:
+ *          type: string
+ *        description: 조회할 작성자 이름
  *    security:
  *      - bearerAuth: []
  *    responses:
@@ -274,6 +289,90 @@
  *                  id: 1
  *                  name: "관리자"
  *                  userId: "admin"
+ *      401:
+ *        description: 인증 실패 (사용자 인증이 필요함)
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                error:
+ *                  type: string
+ *                  description: 오류 메시지
+ *              example:
+ *                error: "Unauthorized"
+ *      403:
+ *        description: 권한 부족 (관리자 권한이 필요함)
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                error:
+ *                  type: string
+ *                  description: 오류 메시지
+ *              example:
+ *                error: "Forbidden"
+ *      404:
+ *        description: 업무 일지를 찾을 수 없음
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                error:
+ *                  type: string
+ *                  description: 오류 메시지
+ *              example:
+ *                error: "Not Found: Report with the given ID does not exist."
+ *      500:
+ *        description: 서버 오류
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                error:
+ *                  type: string
+ *                  description: 오류 메시지
+ *              example:
+ *                error: "서버 오류 발생"
+ */
+
+/**
+ * @swagger
+ * /reports/product-data:
+ *  get:
+ *    summary: 업무 일지 생산 데이터 조회
+ *    description: 관리자가 최근 공장 가동 시간 동안의 생산 정보를 조회합니다.
+ *    tags: [Reports]
+ *    security:
+ *      - bearerAuth: []
+ *    responses:
+ *      200:
+ *        description: 업무 일지 상세 정보가 성공적으로 조회됨
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                uptime:
+ *                  type: string
+ *                  description: 가동 시작 시간
+ *                endTime:
+ *                  type: string
+ *                  description: 가동 종료 시간
+ *                good:
+ *                  type: int
+ *                  description: 양품 카운트
+ *                bad:
+ *                  type: int
+ *                  description: 불량 카운트
+ *              example:
+ *                uptime: "2024-08-01T10:53:56.196Z"
+ *                endTime: "2024-08-01T11:14:42.224Z"
+ *                good: 11
+ *                bad: 4
  *      401:
  *        description: 인증 실패 (사용자 인증이 필요함)
  *        content:
