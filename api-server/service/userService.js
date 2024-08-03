@@ -161,6 +161,9 @@ const service = {
 
     return new Promise((resolve) => {
       resolve({
+        id: selected.id,
+        name: selected.name,
+        role: selected.role,
         token: token,
         refreshToken: refreshToken,
       });

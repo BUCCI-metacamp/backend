@@ -78,6 +78,18 @@ const dao = {
           reject(err);
         });
     });
+  },
+
+  delete(params) {
+    return new Promise((resolve, reject) => {
+      Report.destroy({ where: { id: params.id } })
+        .then((result) => {
+          resolve(result);
+        })
+        .catch((err) => {
+          reject(err);
+        });
+    });
   }
 }
 

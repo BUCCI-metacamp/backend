@@ -138,6 +138,7 @@ const sendProductionData = async (passCount, failCount) => {
     });
     const totalCountLog = [];
     const failCountLog = [];
+    const currentFailCountRatioLog = [];
 
     const recentOperations = await operationDao.findRecentWithLimit(20);
 
@@ -174,6 +175,20 @@ const sendProductionData = async (passCount, failCount) => {
       }
     }
 
+    if (passCount + failCount > 0) {
+      const recentOperation = await operationDao.findRecentByValue(true);
+      const productions = await productionDao.findAllAfterTime({ startTime: recentOperation.time });
+      let tc = 0;
+      let fc = 0; 
+      for (const production of productions) {
+        tc += production.value;
+        if (production.type === 0){
+          fc += production.value;
+        }
+        currentFailCountRatioLog.push({ time: production.time, ratio: fc / tc * 100});
+      }
+    }
+
     socketHandler.emitToRoom('production', 'production_data', {
       passCount: passCount ? passCount : 0,
       failCount: failCount ? failCount : 0,
@@ -181,6 +196,7 @@ const sendProductionData = async (passCount, failCount) => {
       totalFailCount: totalFailCount ? totalFailCount : 0,
       totalCountLog: totalCountLog,
       failCountLog: failCountLog,
+      currentFailCountRatioLog: currentFailCountRatioLog,
     })
   }
 }

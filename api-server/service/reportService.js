@@ -89,6 +89,21 @@ const service = {
     return new Promise((resolve) => {
       resolve(result);
     });
+  },
+
+  async delete(params) {
+    let result = null;
+    try {
+      result = await reportDao.delete(params);
+      logger.debug(`(reportService.delete) ${JSON.stringify(result)}`);
+    } catch (error) {
+      return new Promise((resolve, reject) => {
+        reject(error);
+      });
+    }
+    return new Promise((resolve) => {
+      resolve(result);
+    });
   }
 }
 

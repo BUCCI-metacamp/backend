@@ -25,6 +25,22 @@ const dao = {
           reject(err);
         });
     });
+  },
+
+  // 특정 type의 제일 최근 값 조회
+  findRecentByValue(value) {
+    return new Promise((resolve, reject) => {
+      Operation.findOne({
+        where: { value: value },
+        order: [["time", "DESC"]],
+      })
+        .then((recent) => {
+          resolve(recent ? recent.toJSON() : null);
+        })
+        .catch((err) => {
+          reject(err);
+        });
+    });
   }
 }
 

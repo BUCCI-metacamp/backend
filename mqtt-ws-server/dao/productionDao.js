@@ -53,6 +53,23 @@ const dao = {
           reject(err);
         });
     });
+  },
+
+  // 특정 시간 사이의 모든 데이터 조회
+  findAllAfterTime(params) {
+    return new Promise((resolve, reject) => {
+      const { startTime } = params;
+
+      Production.findAll({
+        where: {
+          time: {
+            [Op.gte]: startTime
+          }
+        }
+      })
+        .then(data => resolve(data.map(o => o.toJSON())))
+        .catch(error => reject(error));
+    });
   }
 }
 
