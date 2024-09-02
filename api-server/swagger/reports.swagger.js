@@ -422,3 +422,65 @@
  *              example:
  *                error: "서버 오류 발생"
  */
+
+/**
+ * @swagger
+ * /reports/{id}:
+ *  delete:
+ *    summary: 업무 일지 삭제
+ *    description: 특정 업무 일지를 ID로 삭제합니다.
+ *    tags: [Reports]
+ *    security:
+ *      - bearerAuth: []
+ *    parameters:
+ *      - in: path
+ *        name: id
+ *        required: true
+ *        schema:
+ *          type: string
+ *        description: 삭제할 업무 일지의 ID
+ *    responses:
+ *      200:
+ *        description: 업무 일지가 성공적으로 삭제됨
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *      400:
+ *        description: 잘못된 요청 (잘못된 ID 형식 등)
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                error:
+ *                  type: string
+ *                  description: 오류 메시지
+ *              example:
+ *                error: "Invalid report ID format"
+ *      404:
+ *        description: 업무 일지를 찾을 수 없음
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                error:
+ *                  type: string
+ *                  description: 오류 메시지
+ *              example:
+ *                error: "Report not found"
+ *      500:
+ *        description: 서버 오류
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                error:
+ *                  type: string
+ *                  description: 오류 메시지
+ *              example:
+ *                error: "Internal server error"
+ */

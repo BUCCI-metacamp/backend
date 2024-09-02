@@ -1,5 +1,5 @@
 {
-  "origin": ["http://localhost:5173"],
+  "origin": ["http://localhost:5173", "http://localhost"],
   "methods": ["OPTIONS", "GET", "POST", "HEAD", "PUT", "PATCH", "DELETE"],
   "credentials": true
 }

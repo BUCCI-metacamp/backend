@@ -83,5 +83,21 @@ router.get('/:id', isLoggedIn, checkRole(['admin']), async (req, res, next) => {
   }
 })
 
+// 업무 일지 삭제
+router.delete('/:id', isLoggedIn, async (req, res, next) => {
+  try {
+    const params = {
+      id: req.params.id,
+    }
+    logger.info(`(report.delete.params) ${JSON.stringify(params)}`);
+    const result = await reportService.delete(params);
+    logger.info(`(report.delete.result) ${JSON.stringify(result)}`);
+
+    res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+})
+
 
 module.exports = router;
